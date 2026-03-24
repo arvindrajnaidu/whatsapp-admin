@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "node start.js"
   },
   "dependencies": {
+    "@buzzie-ai/whatsapp-channel": "^3.0.0",
     "better-sqlite3": "^12.6.2",
     "next": "^15.3.0",
     "react": "^19.0.0",
