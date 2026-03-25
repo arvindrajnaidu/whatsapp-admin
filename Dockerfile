@@ -1,13 +1,25 @@
-FROM node:22-alpine
+FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
-RUN apk add --no-cache wget
+LABEL org.opencontainers.image.title="WhatsApp Admin Assistant" \
+  org.opencontainers.image.description="WhatsApp assistant (brain) with Playwright, ffmpeg, and yt-dlp"
+
+# Install ffmpeg and yt-dlp
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg && \
+    curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
+    chmod a+rx /usr/local/bin/yt-dlp && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+RUN chown pwuser:pwuser /app
 
-COPY package.json package-lock.json ./
+COPY --chown=pwuser:pwuser package.json package-lock.json ./
+
+USER pwuser
 RUN npm ci
 
-COPY . .
+COPY --chown=pwuser:pwuser . .
 RUN npm run build
 
 ENV NODE_ENV=production
