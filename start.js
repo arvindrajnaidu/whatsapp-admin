@@ -60,7 +60,6 @@ next.on("exit", (code) => {
 });
 
 whatsapp.on("exit", (code) => {
-  console.log(`[channel] exited with code ${code}`);
-  next.kill();
-  process.exit(code || 0);
+  console.log(`[channel] exited with code ${code}. Brain still running.`);
+  console.log(`[channel] Run 'npx whatsapp' separately to re-link, then restart.`);
 });
