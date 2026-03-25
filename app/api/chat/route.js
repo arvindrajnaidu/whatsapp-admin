@@ -2,19 +2,20 @@ import { NextResponse } from "next/server";
 import { processMessage, processGroupMessage } from "@/lib/brain/conversation.js";
 import { WhatsAppClient } from "@/lib/whatsapp-client.js";
 import { getWhatsAppHost, getWhatsAppToken } from "@/lib/config.js";
+import { getPersona } from "@/lib/db.js";
 
 /**
  * POST /api/chat
  *
  * Receives an envelope from core's dispatcher:
- * { type, jid, groupName, persona, senderName, text, history, quotedContext, meta }
+ * { type, jid, groupName, senderName, text, history, quotedContext, meta }
  *
  * Returns: { text?, actions? }
  */
 export async function POST(request) {
   try {
     const envelope = await request.json();
-    const { type, jid, groupName, persona, senderName, text, quotedContext, meta } = envelope;
+    const { type, jid, groupName, senderName, text, quotedContext, meta } = envelope;
 
     if (!text) {
       return NextResponse.json({ error: "text is required" }, { status: 400 });
@@ -23,12 +24,16 @@ export async function POST(request) {
     const client = new WhatsAppClient(getWhatsAppHost(), getWhatsAppToken());
     const selfJid = meta?.selfJid || jid;
 
+    // Look up persona from brain's own DB
+    const personaRow = getPersona(jid);
+    const persona = personaRow?.content || null;
+
     let reply;
 
     if (type === "self_chat") {
       reply = await processMessage(text, client, selfJid);
     } else {
-      // group or dm
+      // group or dm — brain decides whether to respond
       reply = await processGroupMessage(
         text,
         jid,

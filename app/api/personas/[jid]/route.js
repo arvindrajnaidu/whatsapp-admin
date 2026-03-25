@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
-import { getClient } from "@/lib/whatsapp-client.js";
+import { getPersona, upsertPersona, deletePersona } from "@/lib/db.js";
 
 export async function GET(request, { params }) {
   try {
     const { jid } = await params;
-    const client = getClient();
-    const persona = await client.getPersona(jid);
-    return NextResponse.json(persona);
+    const persona = getPersona(jid);
+    if (!persona) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({
+      jid: persona.jid,
+      groupName: persona.name,
+      content: persona.content,
+    });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -16,9 +20,8 @@ export async function PUT(request, { params }) {
   try {
     const { jid } = await params;
     const body = await request.json();
-    const client = getClient();
-    const result = await client.setPersona(jid, body.groupName, body.content);
-    return NextResponse.json(result);
+    upsertPersona(jid, body.groupName || body.name || jid, body.content);
+    return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -27,8 +30,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { jid } = await params;
-    const client = getClient();
-    const ok = await client.deletePersona(jid);
+    const ok = deletePersona(jid);
     return NextResponse.json({ ok });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

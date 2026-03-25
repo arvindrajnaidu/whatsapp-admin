@@ -9,7 +9,7 @@
     "start": "node start.js"
   },
   "dependencies": {
-    "@buzzie-ai/whatsapp-channel": "^3.0.0",
+    "@buzzie-ai/whatsapp-channel": "^3.1.1",
     "better-sqlite3": "^12.6.2",
     "next": "^15.3.0",
     "react": "^19.0.0",
