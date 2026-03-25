@@ -28,17 +28,21 @@ export async function POST(request) {
     const personaRow = getPersona(jid);
     const persona = personaRow?.content || null;
 
+    // No persona for this chat — don't respond, don't call AI
+    if (!persona && type !== "self_chat") {
+      return NextResponse.json({});
+    }
+
     let reply;
 
     if (type === "self_chat") {
       reply = await processMessage(text, client, selfJid);
     } else {
-      // group or dm — brain decides whether to respond
       reply = await processGroupMessage(
         text,
         jid,
         groupName || jid,
-        persona || "You are a helpful assistant. Be concise.",
+        persona,
         senderName || "Unknown",
         client,
         selfJid,
