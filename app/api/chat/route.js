@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { processMessage, processGroupMessage } from "@/lib/brain/conversation.js";
 import { WhatsAppClient } from "@/lib/whatsapp-client.js";
 import { getWhatsAppHost, getWhatsAppToken } from "@/lib/config.js";
-import { getPersonaForChat } from "@/lib/db.js";
+import { getPersonaForChat, upsertKnownChat } from "@/lib/db.js";
 
 /**
  * POST /api/chat
@@ -20,6 +20,10 @@ export async function POST(request) {
     if (!text) {
       return NextResponse.json({ error: "text is required" }, { status: 400 });
     }
+
+    // Track this chat so it appears in the mappings UI
+    const chatType = type === "self_chat" ? "self" : (jid?.includes("@g.us") ? "group" : "dm");
+    upsertKnownChat(jid, groupName || senderName || jid, chatType);
 
     const client = new WhatsAppClient(getWhatsAppHost(), getWhatsAppToken());
     const selfJid = meta?.selfJid || jid;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listMappings, upsertMapping, deleteMapping, listPersonas } from "@/lib/db.js";
+import { listMappings, upsertMapping, deleteMapping, listPersonas, listKnownChats } from "@/lib/db.js";
 
 export async function GET() {
   try {
@@ -14,7 +14,17 @@ export async function GET() {
       personaName: personaMap[m.persona_id]?.name || m.persona_id,
     }));
 
-    return NextResponse.json({ chats, personas: personas.map((p) => ({ id: p.jid, name: p.name })) });
+    const knownChats = listKnownChats();
+    const mappedIds = new Set(mappings.map((m) => m.chat_id));
+    const unmapped = knownChats
+      .filter((c) => !mappedIds.has(c.jid) && c.type !== "self")
+      .map((c) => ({ jid: c.jid, name: c.name, type: c.type, lastSeen: c.last_seen }));
+
+    return NextResponse.json({
+      chats,
+      unmapped,
+      personas: personas.map((p) => ({ id: p.jid, name: p.name })),
+    });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
