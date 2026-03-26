@@ -32,8 +32,9 @@ export async function POST(request) {
     const personaRow = getPersonaForChat(jid);
     const persona = personaRow?.content || null;
 
-    // No persona mapped to this chat — don't respond, don't call AI
-    if (!persona && type !== "self_chat") {
+    // Voice calls always get a response; other channels need a persona mapping
+    const isVoice = meta?.channel === "voice";
+    if (!persona && type !== "self_chat" && !isVoice) {
       return NextResponse.json({});
     }
 
@@ -42,11 +43,12 @@ export async function POST(request) {
     if (type === "self_chat") {
       reply = await processMessage(text, client, selfJid);
     } else {
+      const DEFAULT_VOICE_PERSONA = "You are a helpful phone assistant. Be concise and conversational. Keep responses short — the caller is listening, not reading.";
       reply = await processGroupMessage(
         text,
         jid,
         groupName || jid,
-        persona,
+        persona || (isVoice ? DEFAULT_VOICE_PERSONA : "You are a helpful assistant."),
         senderName || "Unknown",
         client,
         selfJid,
