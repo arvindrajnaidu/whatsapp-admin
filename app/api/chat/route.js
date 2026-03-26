@@ -17,6 +17,13 @@ export async function POST(request) {
     const envelope = await request.json();
     const { type, jid, groupName, senderName, text, quotedContext, meta } = envelope;
 
+    // Voice call just connected — return a greeting without running the agent loop
+    if (meta?.event === "call_connected") {
+      const personaRow = getPersonaForChat(jid);
+      const greeting = personaRow?.greeting || "Hello! How can I help you today?";
+      return NextResponse.json({ text: greeting });
+    }
+
     if (!text) {
       return NextResponse.json({ error: "text is required" }, { status: 400 });
     }

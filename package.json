@@ -9,7 +9,7 @@
     "start": "node start.js"
   },
   "dependencies": {
-    "@buzzie-ai/voice-channel": "^1.0.0",
+    "@buzzie-ai/voice-channel": "^1.2.0",
     "@buzzie-ai/whatsapp-channel": "^4.0.0",
     "better-sqlite3": "^12.6.2",
     "videogaga": "^2.0.0",
