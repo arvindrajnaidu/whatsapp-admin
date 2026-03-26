@@ -15,8 +15,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 RUN chown pwuser:pwuser /app && \
-    mkdir -p /home/pwuser/.whatsapp-cli /home/pwuser/.voice-cli && \
-    chown -R pwuser:pwuser /home/pwuser/.whatsapp-cli /home/pwuser/.voice-cli
+    mkdir -p /app/data /home/pwuser/.whatsapp-cli /home/pwuser/.voice-cli && \
+    chown -R pwuser:pwuser /app/data /home/pwuser/.whatsapp-cli /home/pwuser/.voice-cli
 
 COPY --chown=pwuser:pwuser package.json package-lock.json ./
 
