@@ -1,18 +1,23 @@
 services:
   whatsapp-admin:
     build: .
-    command: npx next start
     ports:
       - "3000:3000"
+      - "3100:3100"
+      - "3300:3300"
     environment:
+      NODE_ENV: production
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      WHATSAPP_HOST: ${WHATSAPP_HOST:-http://host.docker.internal:3100}
-      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      BUZZIE_API_PORT: "3100"
     volumes:
       - admin_data:/app/data
+      - whatsapp_data:/root/.whatsapp-cli
+      - voice_data:/root/.voice-cli
     init: true
     restart: unless-stopped
 
 volumes:
   admin_data:
+  whatsapp_data:
+  voice_data:
